@@ -5,7 +5,7 @@ Esta API tem como objetivo ser uma ferramenta auxiliar na etapa de deploy de uma
 
 ## Como executar
 
-Para que seja possível executar com todas suas funcionalidades, a API precisa estar dentro de um cluster Kubernetes com roles e permissões suficientes para realizar operações a nível de cluster. Além disso é necessário que o cluter possua instalado o plugin [metrics server](https://github.com/kubernetes-sigs/metrics-server). 
+Para que seja possível executar com todas suas funcionalidades, a API precisa ser executada dentro de um cluster Kubernetes com [roles e permissões](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) suficientes para realizar operações a nível de cluster. Além disso é necessário que o cluter possua instalado o plugin [metrics server](https://github.com/kubernetes-sigs/metrics-server). 
 
 [Esse projeto](https://github.com/Ayrton02/cluster-infra) possui um exemplo de configuração para executar toda infra local.
 
