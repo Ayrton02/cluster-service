@@ -60,3 +60,18 @@ func UpdateSingleDeployment(w http.ResponseWriter, r *http.Request) {
 
 	middleware.WriteResponse(w, http.StatusNoContent, err)
 }
+
+func CreateDeployment(w http.ResponseWriter, r *http.Request) {
+	var createDeployment DeploymentCreateRequest
+	err := middleware.DeserializeJson(r.Body, &createDeployment)
+	if err != nil {
+		middleware.WriteResponse(w, http.StatusInternalServerError, err)
+	}
+
+	deployment, err := Service.CreateDeployment(createDeployment)
+	if err != nil {
+		middleware.WriteResponse(w, http.StatusInternalServerError, err)
+	}
+
+	middleware.WriteResponse(w, http.StatusCreated, deployment)
+}

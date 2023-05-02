@@ -11,4 +11,5 @@ func registerDeploymentRoutes(router *mux.Router) {
 	router.HandleFunc("/deployments", GetDeployments).Methods(http.MethodGet)
 	router.HandleFunc("/deployments/{name}", DeleteSingleDeployment).Methods(http.MethodDelete)
 	router.HandleFunc("/deployments/{name}", UpdateSingleDeployment).Methods(http.MethodPut)
+	router.HandleFunc("/deployments", CreateDeployment).Methods(http.MethodPost)
 }

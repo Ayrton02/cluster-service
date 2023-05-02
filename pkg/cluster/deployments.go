@@ -28,3 +28,7 @@ func (k K8SDeploymentClient) DeleteDeployment(name string) error {
 func (k K8SDeploymentClient) UpdateDeployment(deployment *apps.Deployment) (*apps.Deployment, error) {
 	return k.Interface.Update(k.Context, deployment, metav1.UpdateOptions{})
 }
+
+func (k K8SDeploymentClient) CreateDeployment(deployment *apps.Deployment) (*apps.Deployment, error) {
+	return k.Interface.Create(k.Context, deployment, metav1.CreateOptions{})
+}

@@ -7,4 +7,5 @@ type deploymentClient interface {
 	GetDeployment(name string) (*apps.Deployment, error)
 	DeleteDeployment(name string) error
 	UpdateDeployment(deployment *apps.Deployment) (*apps.Deployment, error)
+	CreateDeployment(deployment *apps.Deployment) (*apps.Deployment, error)
 }

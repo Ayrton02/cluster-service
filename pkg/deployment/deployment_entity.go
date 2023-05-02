@@ -15,3 +15,12 @@ type DeploymentUpdateRequest struct {
 	Replicas       int32  `json:"replicas,omitempty"`
 	ContainerImage string `json:"containerImage,omitempty"`
 }
+
+type DeploymentCreateRequest struct {
+	Name           string            `json:"name"`
+	Label          map[string]string `json:"label"`
+	Replicas       int32             `json:"replicas"`
+	ContainerImage string            `json:"containerImage"`
+	ContainerName  string            `json:"containerName"`
+	Port           int32             `json:"port"`
+}

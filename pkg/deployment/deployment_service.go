@@ -6,6 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	v1 "k8s.io/api/apps/v1"
+	pv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var Service *deploymentService
@@ -69,6 +71,45 @@ func (s deploymentService) UpdateSingleDeployment(updateDeployment DeploymentUpd
 	_, err = s.client.UpdateDeployment(k8sDeployment)
 
 	return err
+}
+
+func (s deploymentService) CreateDeployment(createDeployment DeploymentCreateRequest) (Deployment, error) {
+	var deployment Deployment
+
+	k8sDeployment, err := s.client.CreateDeployment(&v1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: createDeployment.Name,
+		},
+		Spec: v1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: createDeployment.Label,
+			},
+			Replicas: &createDeployment.Replicas,
+			Template: pv1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: createDeployment.Label,
+				},
+				Spec: pv1.PodSpec{
+					Containers: []pv1.Container{{
+						Name:            createDeployment.ContainerName,
+						Image:           createDeployment.ContainerImage,
+						ImagePullPolicy: "IfNotPresent",
+						Ports: []pv1.ContainerPort{
+							{
+								ContainerPort: createDeployment.Port,
+							},
+						},
+					}},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		return deployment, err
+	}
+
+	return toDeployment(k8sDeployment)
 }
 
 func toDeployment(k8sDeployment *v1.Deployment) (Deployment, error) {
