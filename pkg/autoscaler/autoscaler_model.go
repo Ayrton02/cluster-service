@@ -24,7 +24,14 @@ type PodAutoscalerUpdateRequest struct {
 	Resources []PodResourcesRequest `json:"resources"`
 }
 
+type PodAutoscalerCreateRequest struct {
+	Name             string                `json:"name"`
+	Replicas         PodReplicas           `json:"replicas"`
+	Resources        []PodResourcesRequest `json:"resources"`
+	DeploymentTarget string                `json:"deploymentTarget"`
+}
+
 type PodResourcesRequest struct {
 	Name  string `json:"name"`
-	Value string `json:"value"`
+	Value int32  `json:"value"`
 }

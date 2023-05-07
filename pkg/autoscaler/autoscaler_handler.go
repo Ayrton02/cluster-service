@@ -48,3 +48,19 @@ func UpdateAutoscaler(w http.ResponseWriter, r *http.Request) {
 	middleware.WriteResponse(w, http.StatusNoContent, err)
 
 }
+
+func CreateAutoscaler(w http.ResponseWriter, r *http.Request) {
+	var createAutoscalerRequest PodAutoscalerCreateRequest
+	err := middleware.DeserializeJson(r.Body, &createAutoscalerRequest)
+	if err != nil {
+		middleware.WriteResponse(w, http.StatusInternalServerError, err)
+	}
+
+	res, err := Service.CreateAutoscaler(createAutoscalerRequest)
+	if err != nil {
+		middleware.WriteResponse(w, http.StatusInternalServerError, err)
+	}
+
+	middleware.WriteResponse(w, http.StatusCreated, res)
+
+}

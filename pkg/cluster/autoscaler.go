@@ -24,3 +24,7 @@ func (k K8SAutoscalerClient) GetAutoscalers() (*v2.HorizontalPodAutoscalerList, 
 func (k K8SAutoscalerClient) UpdateAutoscaler(autoscaler *v2.HorizontalPodAutoscaler) (*v2.HorizontalPodAutoscaler, error) {
 	return k.Interface.Update(k.Context, autoscaler, metav1.UpdateOptions{})
 }
+
+func (k K8SAutoscalerClient) CreateAutoscaler(autoscaler *v2.HorizontalPodAutoscaler) (*v2.HorizontalPodAutoscaler, error) {
+	return k.Interface.Create(k.Context, autoscaler, metav1.CreateOptions{})
+}

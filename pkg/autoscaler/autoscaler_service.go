@@ -1,9 +1,12 @@
 package autoscaler
 
 import (
+	"errors"
+
 	"github.com/gorilla/mux"
 	v2 "k8s.io/api/autoscaling/v2"
-	"k8s.io/apimachinery/pkg/api/resource"
+	coreV1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var Service *autoscalerService
@@ -20,33 +23,12 @@ func InitAutoscalertService(client autoscalerClient, route *mux.Router) {
 }
 
 func (s autoscalerService) GetSingleAutoscaler(name string) (PodAutoscaler, error) {
-	var podAutoscaler PodAutoscaler
-	var podResources []PodResources
-
 	res, err := s.client.GetAutoscaler(name)
 	if err != nil {
-		return podAutoscaler, err
+		return PodAutoscaler{}, err
 	}
 
-	for _, r := range res.Spec.Metrics {
-		podResources = append(podResources, PodResources{
-			Name:  string(r.Resource.Name),
-			Type:  string(r.Resource.Target.Type),
-			Value: r.Resource.Target.Value.String(),
-		})
-	}
-
-	podAutoscaler = PodAutoscaler{
-		Name: res.Name,
-		ID:   string(res.UID),
-		Replicas: PodReplicas{
-			Min: *res.Spec.MinReplicas,
-			Max: res.Spec.MaxReplicas,
-		},
-		Resources: podResources,
-	}
-
-	return podAutoscaler, err
+	return convertToPodAutoscaler(res), err
 }
 
 func (s autoscalerService) GetAutoscalers() (autoscalers []PodAutoscaler, err error) {
@@ -56,24 +38,7 @@ func (s autoscalerService) GetAutoscalers() (autoscalers []PodAutoscaler, err er
 	}
 
 	for _, i := range res.Items {
-		resources := make([]PodResources, 0)
-		for _, r := range i.Spec.Metrics {
-			resources = append(resources, PodResources{
-				Name:  string(r.Resource.Name),
-				Type:  string(r.Resource.Target.Type),
-				Value: r.Resource.Target.Value.String(),
-			})
-		}
-
-		autoscalers = append(autoscalers, PodAutoscaler{
-			Name: i.Name,
-			ID:   string(i.UID),
-			Replicas: PodReplicas{
-				Min: *i.Spec.MinReplicas,
-				Max: i.Spec.MaxReplicas,
-			},
-			Resources: resources,
-		})
+		autoscalers = append(autoscalers, convertToPodAutoscaler(&i))
 	}
 
 	return
@@ -91,6 +56,21 @@ func (s autoscalerService) UpdateAutoscaler(updateAutoscaler PodAutoscalerUpdate
 	return err
 }
 
+func (s autoscalerService) CreateAutoscaler(createAutoscaler PodAutoscalerCreateRequest) (PodAutoscaler, error) {
+	var podAutoscaler PodAutoscaler
+	req, err := prepareToCreate(createAutoscaler)
+	if err != nil {
+		return podAutoscaler, err
+	}
+
+	k8sAutoScaler, err := s.client.CreateAutoscaler(req)
+	if err != nil {
+		return podAutoscaler, err
+	}
+
+	return convertToPodAutoscaler(k8sAutoScaler), err
+}
+
 func prepareToUpdate(k8sAutoscaler *v2.HorizontalPodAutoscaler, updateAutoscaler PodAutoscalerUpdateRequest) {
 	if updateAutoscaler.Replicas.Max > 0 {
 		k8sAutoscaler.Spec.MaxReplicas = updateAutoscaler.Replicas.Max
@@ -103,8 +83,63 @@ func prepareToUpdate(k8sAutoscaler *v2.HorizontalPodAutoscaler, updateAutoscaler
 	for _, r := range updateAutoscaler.Resources {
 		for _, kr := range k8sAutoscaler.Spec.Metrics {
 			if kr.Resource.Name.String() == r.Name {
-				kr.Resource.Target.Value = &resource.Quantity{Format: resource.Format(r.Value)}
+				kr.Resource.Target.AverageUtilization = &r.Value
 			}
 		}
 	}
+}
+
+func convertToPodAutoscaler(k8sAutoscaler *v2.HorizontalPodAutoscaler) PodAutoscaler {
+	var podResources []PodResources
+
+	for _, r := range k8sAutoscaler.Spec.Metrics {
+		podResources = append(podResources, PodResources{
+			Name:  string(r.Resource.Name),
+			Type:  string(r.Resource.Target.Type),
+			Value: r.Resource.Target.Value.String(),
+		})
+	}
+
+	return PodAutoscaler{
+		Name:      k8sAutoscaler.Name,
+		ID:        string(k8sAutoscaler.UID),
+		Resources: podResources,
+		Replicas: PodReplicas{
+			Min: *k8sAutoscaler.Spec.MinReplicas,
+			Max: k8sAutoscaler.Spec.MaxReplicas,
+		},
+	}
+}
+
+func prepareToCreate(createAutoscaler PodAutoscalerCreateRequest) (*v2.HorizontalPodAutoscaler, error) {
+	metrics := make([]v2.MetricSpec, len(createAutoscaler.Resources))
+	for _, r := range createAutoscaler.Resources {
+		if r.Name != "cpu" || r.Name == "memory" {
+			return &v2.HorizontalPodAutoscaler{}, errors.New("only accepted cpu or memory resource")
+		}
+
+		metrics = append(metrics, v2.MetricSpec{
+			Type: v2.ResourceMetricSourceType,
+			Resource: &v2.ResourceMetricSource{
+				Name: coreV1.ResourceName(createAutoscaler.Name),
+				Target: v2.MetricTarget{
+					Type:               v2.UtilizationMetricType,
+					AverageUtilization: &r.Value,
+				},
+			},
+		})
+	}
+
+	return &v2.HorizontalPodAutoscaler{
+		ObjectMeta: v1.ObjectMeta{
+			Name: createAutoscaler.Name,
+		},
+		Spec: v2.HorizontalPodAutoscalerSpec{
+			ScaleTargetRef: v2.CrossVersionObjectReference{
+				Kind: "Deployment",
+				Name: createAutoscaler.DeploymentTarget,
+			},
+			Metrics: metrics,
+		},
+	}, nil
 }
