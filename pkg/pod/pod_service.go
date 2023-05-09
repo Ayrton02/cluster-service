@@ -37,11 +37,13 @@ func (s podService) GetPods(options string) ([]Pod, error) {
 
 		pods = append(pods,
 			Pod{
-				Name:    p.Name,
-				Status:  string(p.Status.Phase),
-				IP:      p.Status.HostIP,
-				UUID:    string(p.UID),
-				Metrics: metrics,
+				Name:           p.Name,
+				Status:         string(p.Status.Phase),
+				IP:             p.Status.PodIP,
+				ContainerImage: p.Spec.Containers[0].Image,
+				ContainerPort:  p.Spec.Containers[0].Ports[0].HostPort,
+				UUID:           string(p.UID),
+				Metrics:        metrics,
 			},
 		)
 	}
@@ -64,10 +66,12 @@ func (s podService) GetSinglePod(name string) (Pod, error) {
 	}
 
 	pod = Pod{
-		Name:   res.Name,
-		Status: string(res.Status.Phase),
-		IP:     res.Status.HostIP,
-		UUID:   string(res.UID),
+		Name:           res.Name,
+		Status:         string(res.Status.Phase),
+		IP:             res.Status.PodIP,
+		UUID:           string(res.UID),
+		ContainerImage: res.Spec.Containers[0].Image,
+		ContainerPort:  res.Spec.Containers[0].Ports[0].HostPort,
 		Metrics: Metrics{
 			Memory: podMetrics.Containers[0].Usage.Memory().String(),
 			CPU:    podMetrics.Containers[0].Usage.Cpu().String(),
