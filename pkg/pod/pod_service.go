@@ -41,7 +41,7 @@ func (s podService) GetPods(options string) ([]Pod, error) {
 				Status:         string(p.Status.Phase),
 				IP:             p.Status.PodIP,
 				ContainerImage: p.Spec.Containers[0].Image,
-				ContainerPort:  p.Spec.Containers[0].Ports[0].HostPort,
+				ContainerPort:  p.Spec.Containers[0].Ports[0].ContainerPort,
 				UUID:           string(p.UID),
 				Metrics:        metrics,
 			},
@@ -71,7 +71,7 @@ func (s podService) GetSinglePod(name string) (Pod, error) {
 		IP:             res.Status.PodIP,
 		UUID:           string(res.UID),
 		ContainerImage: res.Spec.Containers[0].Image,
-		ContainerPort:  res.Spec.Containers[0].Ports[0].HostPort,
+		ContainerPort:  res.Spec.Containers[0].Ports[0].ContainerPort,
 		Metrics: Metrics{
 			Memory: podMetrics.Containers[0].Usage.Memory().String(),
 			CPU:    podMetrics.Containers[0].Usage.Cpu().String(),
