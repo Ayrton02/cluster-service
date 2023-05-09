@@ -26,21 +26,22 @@ func (s podService) GetPods(options string) ([]Pod, error) {
 	}
 
 	for _, p := range res.Items {
+		var metrics Metrics
 		podMetrics, err := s.client.GetPodMetrics(p.Name)
-		if err != nil {
-			return pods, err
+		if err == nil {
+			metrics = Metrics{
+				Memory: podMetrics.Containers[0].Usage.Memory().String(),
+				CPU:    podMetrics.Containers[0].Usage.Cpu().String(),
+			}
 		}
 
 		pods = append(pods,
 			Pod{
-				Name:   p.Name,
-				Status: string(p.Status.Phase),
-				IP:     p.Status.HostIP,
-				UUID:   string(p.UID),
-				Metrics: Metrics{
-					Memory: podMetrics.Containers[0].Usage.Memory().String(),
-					CPU:    podMetrics.Containers[0].Usage.Cpu().String(),
-				},
+				Name:    p.Name,
+				Status:  string(p.Status.Phase),
+				IP:      p.Status.HostIP,
+				UUID:    string(p.UID),
+				Metrics: metrics,
 			},
 		)
 	}

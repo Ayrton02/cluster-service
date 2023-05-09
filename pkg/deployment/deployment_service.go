@@ -66,7 +66,13 @@ func (s deploymentService) UpdateSingleDeployment(updateDeployment DeploymentUpd
 		return err
 	}
 
-	prepareToUpdate(k8sDeployment, updateDeployment)
+	if updateDeployment.Replicas != 0 {
+		k8sDeployment.Spec.Replicas = &updateDeployment.Replicas
+	}
+
+	if updateDeployment.ContainerImage != "" {
+		k8sDeployment.Spec.Template.Spec.Containers[0].Image = updateDeployment.ContainerImage
+	}
 
 	_, err = s.client.UpdateDeployment(k8sDeployment)
 
@@ -78,7 +84,8 @@ func (s deploymentService) CreateDeployment(createDeployment DeploymentCreateReq
 
 	k8sDeployment, err := s.client.CreateDeployment(&v1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: createDeployment.Name,
+			Name:   createDeployment.Name,
+			Labels: createDeployment.Label,
 		},
 		Spec: v1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -139,16 +146,4 @@ func toDeployment(k8sDeployment *v1.Deployment) (Deployment, error) {
 	}
 
 	return deployment, nil
-}
-
-func prepareToUpdate(k8sDeployment *v1.Deployment, updateDeployment DeploymentUpdateRequest) {
-	if updateDeployment.Replicas != 0 {
-		k8sDeployment.Spec.Replicas = &updateDeployment.Replicas
-	}
-
-	if updateDeployment.ContainerImage != "" {
-		for _, c := range k8sDeployment.Spec.Template.Spec.Containers {
-			c.Image = updateDeployment.ContainerImage
-		}
-	}
 }
