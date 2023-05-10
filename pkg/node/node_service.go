@@ -66,24 +66,3 @@ func (s nodeService) GetSingleNodeMetrics(name string) (NodeMetrics, error) {
 	}, err
 
 }
-
-func (s nodeService) GetNodesMetrics() ([]NodeMetrics, error) {
-	var metrics []NodeMetrics
-	res, err := s.client.GetNodesMetrics()
-	if err != nil {
-		return metrics, err
-	}
-
-	for _, i := range res.Items {
-
-		metrics = append(metrics,
-			NodeMetrics{
-				Name:        i.Name,
-				MemoryUsage: i.Usage.Memory().String(),
-				CPUUsage:    i.Usage.Cpu().String(),
-				UUID:        string(i.ObjectMeta.UID),
-			})
-	}
-
-	return metrics, err
-}

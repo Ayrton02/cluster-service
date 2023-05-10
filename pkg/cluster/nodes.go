@@ -27,7 +27,3 @@ func (k K8SNodeClient) GetNode(name string) (*core.Node, error) {
 func (k K8SNodeClient) GetNodeMetrics(name string) (*metricsType.NodeMetrics, error) {
 	return k.Metrics.Get(k.Context, name, metav1.GetOptions{})
 }
-
-func (k K8SNodeClient) GetNodesMetrics() (*metricsType.NodeMetricsList, error) {
-	return k.Metrics.List(k.Context, metav1.ListOptions{})
-}

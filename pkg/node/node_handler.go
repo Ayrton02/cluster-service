@@ -40,13 +40,3 @@ func GetSingleNodeMetrics(w http.ResponseWriter, r *http.Request) {
 
 	middleware.WriteResponse(w, http.StatusOK, node)
 }
-
-func GetNodesMetrics(w http.ResponseWriter, r *http.Request) {
-
-	nodes, err := Service.GetNodesMetrics()
-	if err != nil {
-		middleware.WriteResponse(w, http.StatusInternalServerError, err)
-	}
-
-	middleware.WriteResponse(w, http.StatusOK, nodes)
-}
