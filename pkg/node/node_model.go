@@ -1,12 +1,15 @@
 package node
 
 type Node struct {
-	Name   string `json:"name"`
-	UUID   string `json:"uuid"`
-	Memory string `json:"memory"`
-	CPU    string `json:"cpu"`
+	Name            string `json:"name"`
+	UUID            string `json:"uuid"`
+	MemoryAllocated string `json:"memoryAllocated"`
+	CPUAllocated    string `json:"cpuAllocated"`
 }
 
 type Metrics struct {
-	Node
+	Name        string `json:"name"`
+	UUID        string `json:"uuid"`
+	MemoryUsage string `json:"memoryUsage"`
+	CPUUsage    string `json:"cpuUsage"`
 }

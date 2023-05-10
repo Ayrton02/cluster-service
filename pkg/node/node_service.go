@@ -27,10 +27,10 @@ func (s nodeService) GetNodes() ([]Node, error) {
 	for _, i := range res.Items {
 
 		nodes = append(nodes, Node{
-			Name:   i.Name,
-			UUID:   string(i.UID),
-			Memory: i.Status.Allocatable.Memory().String(),
-			CPU:    i.Status.Allocatable.Cpu().String(),
+			Name:            i.Name,
+			UUID:            string(i.UID),
+			MemoryAllocated: i.Status.Allocatable.Memory().String(),
+			CPUAllocated:    i.Status.Allocatable.Cpu().String(),
 		})
 	}
 
@@ -44,10 +44,10 @@ func (s nodeService) GetSingleNode(name string) (Node, error) {
 	}
 
 	return Node{
-		Name:   res.Name,
-		UUID:   string(res.UID),
-		Memory: res.Status.Allocatable.Memory().String(),
-		CPU:    res.Status.Allocatable.Cpu().String(),
+		Name:            res.Name,
+		UUID:            string(res.UID),
+		MemoryAllocated: res.Status.Allocatable.Memory().String(),
+		CPUAllocated:    res.Status.Allocatable.Cpu().String(),
 	}, err
 
 }
@@ -59,12 +59,10 @@ func (s nodeService) GetSingleNodeMetrics(name string) (Metrics, error) {
 	}
 
 	return Metrics{
-		Node: Node{
-			Name:   res.Name,
-			UUID:   string(res.UID),
-			Memory: res.Usage.Memory().String(),
-			CPU:    res.Usage.Cpu().String(),
-		},
+		Name:        res.Name,
+		MemoryUsage: res.Usage.Memory().String(),
+		CPUUsage:    res.Usage.Cpu().String(),
+		UUID:        string(res.ObjectMeta.UID),
 	}, err
 
 }
@@ -80,12 +78,10 @@ func (s nodeService) GetNodesMetrics() ([]Metrics, error) {
 
 		metrics = append(metrics,
 			Metrics{
-				Node: Node{
-					Name:   i.Name,
-					UUID:   string(i.UID),
-					Memory: i.Usage.Memory().String(),
-					CPU:    i.Usage.Cpu().String(),
-				},
+				Name:        i.Name,
+				MemoryUsage: i.Usage.Memory().String(),
+				CPUUsage:    i.Usage.Cpu().String(),
+				UUID:        string(i.ObjectMeta.UID),
 			})
 	}
 
