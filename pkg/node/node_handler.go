@@ -11,40 +11,42 @@ func GetSingleNode(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	name := pathParams["name"]
 
-	deployment, err := Service.GetSingleNode(name)
+	node, err := Service.GetSingleNode(name)
 	if err != nil {
 		middleware.WriteResponse(w, http.StatusInternalServerError, err)
 	}
 
-	middleware.WriteResponse(w, http.StatusOK, deployment)
+	middleware.WriteResponse(w, http.StatusOK, node)
 }
 
 func GetNodes(w http.ResponseWriter, r *http.Request) {
 
-	deployments, err := Service.GetNodes()
+	nodes, err := Service.GetNodes()
 	if err != nil {
 		middleware.WriteResponse(w, http.StatusInternalServerError, err)
 	}
 
-	middleware.WriteResponse(w, http.StatusOK, deployments)
+	middleware.WriteResponse(w, http.StatusOK, nodes)
 }
 
 func GetSingleNodeMetrics(w http.ResponseWriter, r *http.Request) {
+	pathParams := mux.Vars(r)
+	name := pathParams["name"]
 
-	deployments, err := Service.GetNodes()
+	node, err := Service.GetSingleNodeMetrics(name)
 	if err != nil {
 		middleware.WriteResponse(w, http.StatusInternalServerError, err)
 	}
 
-	middleware.WriteResponse(w, http.StatusOK, deployments)
+	middleware.WriteResponse(w, http.StatusOK, node)
 }
 
 func GetNodesMetrics(w http.ResponseWriter, r *http.Request) {
 
-	deployments, err := Service.GetNodes()
+	nodes, err := Service.GetNodesMetrics()
 	if err != nil {
 		middleware.WriteResponse(w, http.StatusInternalServerError, err)
 	}
 
-	middleware.WriteResponse(w, http.StatusOK, deployments)
+	middleware.WriteResponse(w, http.StatusOK, nodes)
 }
