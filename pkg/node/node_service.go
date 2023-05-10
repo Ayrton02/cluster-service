@@ -52,13 +52,13 @@ func (s nodeService) GetSingleNode(name string) (Node, error) {
 
 }
 
-func (s nodeService) GetSingleNodeMetrics(name string) (Metrics, error) {
+func (s nodeService) GetSingleNodeMetrics(name string) (NodeMetrics, error) {
 	res, err := s.client.GetNodeMetrics(name)
 	if err != nil {
-		return Metrics{}, err
+		return NodeMetrics{}, err
 	}
 
-	return Metrics{
+	return NodeMetrics{
 		Name:        res.Name,
 		MemoryUsage: res.Usage.Memory().String(),
 		CPUUsage:    res.Usage.Cpu().String(),
@@ -67,8 +67,8 @@ func (s nodeService) GetSingleNodeMetrics(name string) (Metrics, error) {
 
 }
 
-func (s nodeService) GetNodesMetrics() ([]Metrics, error) {
-	var metrics []Metrics
+func (s nodeService) GetNodesMetrics() ([]NodeMetrics, error) {
+	var metrics []NodeMetrics
 	res, err := s.client.GetNodesMetrics()
 	if err != nil {
 		return metrics, err
@@ -77,7 +77,7 @@ func (s nodeService) GetNodesMetrics() ([]Metrics, error) {
 	for _, i := range res.Items {
 
 		metrics = append(metrics,
-			Metrics{
+			NodeMetrics{
 				Name:        i.Name,
 				MemoryUsage: i.Usage.Memory().String(),
 				CPUUsage:    i.Usage.Cpu().String(),

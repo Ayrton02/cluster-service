@@ -7,7 +7,7 @@ type Node struct {
 	CPUAllocated    string `json:"cpuAllocated"`
 }
 
-type Metrics struct {
+type NodeMetrics struct {
 	Name        string `json:"name"`
 	UUID        string `json:"uuid"`
 	MemoryUsage string `json:"memoryUsage"`
