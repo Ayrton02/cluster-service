@@ -112,7 +112,7 @@ func convertToPodAutoscaler(k8sAutoscaler *v2.HorizontalPodAutoscaler) PodAutosc
 }
 
 func prepareToCreate(createAutoscaler PodAutoscalerCreateRequest) (*v2.HorizontalPodAutoscaler, error) {
-	metrics := make([]v2.MetricSpec, len(createAutoscaler.Resources))
+	var metrics []v2.MetricSpec
 	for _, r := range createAutoscaler.Resources {
 		var resourceName coreV1.ResourceName
 		switch r.Name {
