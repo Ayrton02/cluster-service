@@ -96,7 +96,7 @@ func convertToPodAutoscaler(k8sAutoscaler *v2.HorizontalPodAutoscaler) PodAutosc
 		podResources = append(podResources, PodResources{
 			Name:  string(r.Resource.Name),
 			Type:  string(r.Resource.Target.Type),
-			Value: r.Resource.Target.Value.String(),
+			Value: *r.Resource.Target.AverageUtilization,
 		})
 	}
 
@@ -114,14 +114,20 @@ func convertToPodAutoscaler(k8sAutoscaler *v2.HorizontalPodAutoscaler) PodAutosc
 func prepareToCreate(createAutoscaler PodAutoscalerCreateRequest) (*v2.HorizontalPodAutoscaler, error) {
 	metrics := make([]v2.MetricSpec, len(createAutoscaler.Resources))
 	for _, r := range createAutoscaler.Resources {
-		if r.Name != "cpu" || r.Name == "memory" {
+		var resourceName coreV1.ResourceName
+		switch r.Name {
+		case "cpu":
+			resourceName = coreV1.ResourceCPU
+		case "memory":
+			resourceName = coreV1.ResourceMemory
+		default:
 			return &v2.HorizontalPodAutoscaler{}, errors.New("only accepted cpu or memory resource")
 		}
 
 		metrics = append(metrics, v2.MetricSpec{
 			Type: v2.ResourceMetricSourceType,
 			Resource: &v2.ResourceMetricSource{
-				Name: coreV1.ResourceName(createAutoscaler.Name),
+				Name: resourceName,
 				Target: v2.MetricTarget{
 					Type:               v2.UtilizationMetricType,
 					AverageUtilization: &r.Value,
@@ -139,7 +145,9 @@ func prepareToCreate(createAutoscaler PodAutoscalerCreateRequest) (*v2.Horizonta
 				Kind: "Deployment",
 				Name: createAutoscaler.DeploymentTarget,
 			},
-			Metrics: metrics,
+			Metrics:     metrics,
+			MinReplicas: &createAutoscaler.Replicas.Min,
+			MaxReplicas: createAutoscaler.Replicas.Max,
 		},
 	}, nil
 }

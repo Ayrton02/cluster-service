@@ -15,7 +15,7 @@ type PodReplicas struct {
 type PodResources struct {
 	Name  string `json:"name"`
 	Type  string `json:"type"`
-	Value string `json:"value"`
+	Value int32  `json:"value"`
 }
 
 type PodAutoscalerUpdateRequest struct {
