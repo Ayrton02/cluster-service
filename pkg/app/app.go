@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"service-client/configs"
+	"service-client/pkg/autoscaler"
 	"service-client/pkg/cluster"
 	"service-client/pkg/deployment"
 	"service-client/pkg/node"
@@ -42,5 +43,6 @@ func (a *App) Start() {
 	pod.InitPodService(k8sclient.Pods, router)
 	deployment.InitDeploymentService(k8sclient.Deployment, router)
 	node.InitNodeService(k8sclient.Node, router)
+	autoscaler.InitAutoscalertService(k8sclient.Autoscalers, router)
 	http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk)(router))
 }

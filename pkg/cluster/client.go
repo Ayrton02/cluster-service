@@ -8,11 +8,11 @@ import (
 )
 
 type K8SClient struct {
-	Context    context.Context
-	Pods       *K8SPodClient
-	Services   *K8SAutoscalerClient
-	Deployment *K8SDeploymentClient
-	Node       *K8SNodeClient
+	Context     context.Context
+	Pods        *K8SPodClient
+	Autoscalers *K8SAutoscalerClient
+	Deployment  *K8SDeploymentClient
+	Node        *K8SNodeClient
 }
 
 type K8SClientSets struct {
@@ -33,7 +33,7 @@ func NewK8SClient(Ctx context.Context, sets K8SClientSets, namespaces K8SNamespa
 			Interface: sets.Client.CoreV1().Pods(namespaces.Operational),
 			Metrics:   sets.Metrics.MetricsV1beta1().PodMetricses(namespaces.Operational),
 		},
-		Services: &K8SAutoscalerClient{
+		Autoscalers: &K8SAutoscalerClient{
 			Context:   Ctx,
 			Interface: sets.Client.AutoscalingV2().HorizontalPodAutoscalers(namespaces.Operational),
 		},
