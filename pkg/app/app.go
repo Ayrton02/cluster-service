@@ -40,9 +40,17 @@ func (a *App) Start() {
 	originsOk := handlers.AllowedOrigins([]string{a.Config.API.AllowedOrigins})
 
 	router := mux.NewRouter()
+	router.Use(commonMiddleware)
 	pod.InitPodService(k8sclient.Pods, router)
 	deployment.InitDeploymentService(k8sclient.Deployment, router)
 	node.InitNodeService(k8sclient.Node, router)
 	autoscaler.InitAutoscalertService(k8sclient.Autoscalers, router)
 	http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk)(router))
+}
+
+func commonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
 }
