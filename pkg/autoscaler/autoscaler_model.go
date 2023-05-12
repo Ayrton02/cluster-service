@@ -1,10 +1,11 @@
 package autoscaler
 
 type PodAutoscaler struct {
-	Name      string         `json:"name"`
-	ID        string         `json:"id"`
-	Replicas  PodReplicas    `json:"replicas"`
-	Resources []PodResources `json:"resources"`
+	Name             string         `json:"name"`
+	ID               string         `json:"id"`
+	Replicas         PodReplicas    `json:"replicas"`
+	Resources        []PodResources `json:"resources"`
+	DeploymentTarget string         `json:"deploymentTarget"`
 }
 
 type PodReplicas struct {

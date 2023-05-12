@@ -101,9 +101,10 @@ func convertToPodAutoscaler(k8sAutoscaler *v2.HorizontalPodAutoscaler) PodAutosc
 	}
 
 	return PodAutoscaler{
-		Name:      k8sAutoscaler.Name,
-		ID:        string(k8sAutoscaler.UID),
-		Resources: podResources,
+		DeploymentTarget: k8sAutoscaler.Spec.ScaleTargetRef.Name,
+		Name:             k8sAutoscaler.Name,
+		ID:               string(k8sAutoscaler.UID),
+		Resources:        podResources,
 		Replicas: PodReplicas{
 			Min: *k8sAutoscaler.Spec.MinReplicas,
 			Max: k8sAutoscaler.Spec.MaxReplicas,
@@ -142,8 +143,9 @@ func prepareToCreate(createAutoscaler PodAutoscalerCreateRequest) (*v2.Horizonta
 		},
 		Spec: v2.HorizontalPodAutoscalerSpec{
 			ScaleTargetRef: v2.CrossVersionObjectReference{
-				Kind: "Deployment",
-				Name: createAutoscaler.DeploymentTarget,
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       createAutoscaler.DeploymentTarget,
 			},
 			Metrics:     metrics,
 			MinReplicas: &createAutoscaler.Replicas.Min,

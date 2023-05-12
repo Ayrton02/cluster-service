@@ -3,11 +3,12 @@ package deployment
 import "service-client/pkg/pod"
 
 type Deployment struct {
-	Name           string    `json:"name"`
-	ID             string    `json:"id"`
-	NumberOfPods   int32     `json:"numberOfPods"`
-	ContainerImage string    `json:"containerImage"`
-	Pods           []pod.Pod `json:"pods"`
+	Name           string            `json:"name"`
+	ID             string            `json:"id"`
+	NumberOfPods   int32             `json:"numberOfPods"`
+	ContainerImage string            `json:"containerImage"`
+	Label          map[string]string `json:"label"`
+	Pods           []pod.Pod         `json:"pods"`
 }
 
 type DeploymentUpdateRequest struct {

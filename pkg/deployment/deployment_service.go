@@ -6,7 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	v1 "k8s.io/api/apps/v1"
-	pv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -92,21 +93,28 @@ func (s deploymentService) CreateDeployment(createDeployment DeploymentCreateReq
 				MatchLabels: createDeployment.Label,
 			},
 			Replicas: &createDeployment.Replicas,
-			Template: pv1.PodTemplateSpec{
+			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: createDeployment.Label,
 				},
-				Spec: pv1.PodSpec{
-					Containers: []pv1.Container{{
-						Name:            createDeployment.ContainerName,
-						Image:           createDeployment.ContainerImage,
-						ImagePullPolicy: "IfNotPresent",
-						Ports: []pv1.ContainerPort{
-							{
-								ContainerPort: createDeployment.Port,
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            createDeployment.ContainerName,
+							Image:           createDeployment.ContainerImage,
+							ImagePullPolicy: "IfNotPresent",
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: createDeployment.Port,
+								},
+							},
+							Resources: corev1.ResourceRequirements{
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse("0.5"),
+								},
 							},
 						},
-					}},
+					},
 				},
 			},
 		},
@@ -138,6 +146,7 @@ func toDeployment(k8sDeployment *v1.Deployment) (Deployment, error) {
 	}
 
 	deployment = Deployment{
+		Label:          k8sDeployment.Labels,
 		Name:           k8sDeployment.Name,
 		ID:             string(k8sDeployment.UID),
 		Pods:           pods,
